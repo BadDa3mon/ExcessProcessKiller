@@ -62,5 +62,7 @@
         <CheckBox x:Name="from_file_checkbox" Content="Импорт из файла" HorizontalAlignment="Left" Margin="11,202,0,0" VerticalAlignment="Top" Click="from_file_checkbox_Click" ToolTip="Импорт текстового документа с названиями процессов" />
         <Button x:Name="kill_selected_button" Content="Убить" HorizontalAlignment="Left" Margin="329,175,0,0" VerticalAlignment="Top" Width="90" Height="25" FontSize="16" Click="kill_selected_button_Click" ToolTip="Убить все выделенные процессы"/>
         <Button x:Name="kill_all_button" Content="Убить все" HorizontalAlignment="Left" Margin="329,145,0,0" VerticalAlignment="Top" Width="90" Height="25" FontSize="16" Click="kill_all_button_Click" ToolTip="Убить все процессы находящиеся в списке"/>
+        <CheckBox x:Name="timer_checkbox" Content="Таймер" HorizontalAlignment="Left" Margin="329,45,0,0" VerticalAlignment="Top" Click="timer_checkbox_Click"/>
+        <TextBox x:Name="time_textbox" HorizontalAlignment="Left" Height="18" Margin="329,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="103" TextChanged="time_textbox_TextChanged" Text="20"/>
     </Grid>
 </Window>

@@ -15,6 +15,8 @@ using System.Windows.Shapes;
 using System.Configuration;
 using Microsoft.Win32;
 using System.Diagnostics;
+using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace ExcessProcessKiller
 {
@@ -23,13 +25,31 @@ namespace ExcessProcessKiller
     /// </summary>
     public partial class MainWindow : Window
     {
-        public bool isFromFile, isDebug;
+        public bool isFromFile, isDebug, isFromTime;
+        public int time;
         public string procsPath;
         public MainWindow()
         {
             InitializeComponent();
+            InitializeTimer();
             InitializeConfig();
             InitializeProcesses();
+        }
+
+        private void InitializeTimer()
+        {
+            if (isFromTime)
+            {
+                int min = 5;
+                TimerCallback TC = new TimerCallback(UpdateFromTime);
+                Timer timer = new Timer(TC, null, 0, min * 1000);
+            }
+            else { if (isDebug) { MessageBox.Show($"Timer checkbox not checked!", "Debug", MessageBoxButton.OK); } }
+        }
+
+        private void UpdateFromTime(object time)
+        {
+            MessageBox.Show("I'm heeeere :)");
         }
 
         private void InitializeConfig()
@@ -38,12 +58,16 @@ namespace ExcessProcessKiller
             if (appSettings.Count != 0)
             {
                 isFromFile = bool.Parse(appSettings.Get("isFromFile"));
+                isFromTime = bool.Parse(appSettings.Get("isFromTime"));
+                time = int.Parse(appSettings.Get("time"));
                 procsPath = appSettings.Get("procsPath");
                 isDebug = bool.Parse(appSettings.Get("isDebug"));
             }
             else
             {
                 InitializePreset("isFromFile", "false");
+                InitializePreset("isFromTime", "false");
+                InitializePreset("time", "-1");
                 InitializePreset("procsPath", "null");
                 InitializePreset("isDebug", "true");
             }
@@ -70,6 +94,7 @@ namespace ExcessProcessKiller
                 select_file_button.Visibility = Visibility.Hidden;
                 file_processes_label.Visibility = Visibility.Hidden;
             }
+            time_textbox.MaxLength = 8;
         }
 
         private void InitializePreset(string key, string value)
@@ -110,10 +135,10 @@ namespace ExcessProcessKiller
                                 processes_listview.Items.Add(item);
                             }
                         }
-                        catch (IndexOutOfRangeException) { if (isDebug) { MessageBox.Show($"Process with name {processes[i]} not exist!", "Error!", MessageBoxButton.OK); } }
+                        catch (IndexOutOfRangeException) { if (isDebug) { MessageBox.Show($"Process with name {processes[i]} not exist!", "Debug!", MessageBoxButton.OK); } }
                     }
                 }
-                else { if (isDebug) { MessageBox.Show($"{procsPath} - not exist!", "Error!", MessageBoxButton.OK); } }
+                else { if (isDebug) { MessageBox.Show($"{procsPath} - not exist!", "Debug", MessageBoxButton.OK); } }
                 
             }
             else
@@ -152,7 +177,22 @@ namespace ExcessProcessKiller
         private void KillProcessByName(string name)
         {
             name = name.Replace("System.Windows.Controls.ListViewItem: ", "");
-            MessageBox.Show($"{name} - to kill!", "Info!", MessageBoxButton.OK);
+            if (isDebug) { MessageBox.Show($"{name} - to kill!", "Debug", MessageBoxButton.OK); }
+        }
+
+        private void time_textbox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string reg = @"\b[0-9]{1,}\b";
+            if (Regex.IsMatch(time_textbox.Text, reg) != true) 
+            {
+                time_textbox.Clear();
+                MessageBox.Show($"Please, input only digits!", "Debug", MessageBoxButton.OK);
+            }
+        }
+
+        private void timer_checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            InitializeTimer();
         }
 
         private void kill_all_button_Click(object sender, RoutedEventArgs e)
