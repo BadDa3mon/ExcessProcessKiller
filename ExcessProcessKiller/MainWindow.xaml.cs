@@ -1,22 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Configuration;
 using Microsoft.Win32;
 using System.Diagnostics;
-using System.Threading;
 using System.Text.RegularExpressions;
+using System.Timers;
+using System.ComponentModel;
+using System.Windows.Media;
 
 namespace ExcessProcessKiller
 {
@@ -28,28 +20,48 @@ namespace ExcessProcessKiller
         public bool isFromFile, isDebug, isFromTime;
         public int time;
         public string procsPath;
+        public Timer timer;
+        WindowState lastState;
         public MainWindow()
         {
             InitializeComponent();
-            InitializeTimer();
             InitializeConfig();
+            InitializeTimer();
             InitializeProcesses();
         }
 
         private void InitializeTimer()
         {
+            Color my = new Color();
             if (isFromTime)
             {
-                int min = 5;
-                TimerCallback TC = new TimerCallback(UpdateFromTime);
-                Timer timer = new Timer(TC, null, 0, min * 1000);
+                if (time != -1)
+                {
+                    timer = new Timer(time * 1000 * 60);
+                    timer.Elapsed += OnTimedEvent;
+                    timer.AutoReset = true;
+                    timer.Enabled = true;
+                    my = (Color)ColorConverter.ConvertFromString("#FF000000");
+                }
+                else 
+                { 
+                    if(isDebug) { MessageBox.Show("Time = -1, please replace!", "Debug"); }
+                    my = (Color)ColorConverter.ConvertFromString("#FFFF0000");
+                }
             }
-            else { if (isDebug) { MessageBox.Show($"Timer checkbox not checked!", "Debug", MessageBoxButton.OK); } }
+            else if (timer != null) { timer.Dispose(); }
+            else { if (isDebug) { MessageBox.Show($"Timer is null, isFromTime - {isFromTime}!", "Debug", MessageBoxButton.OK); } }
+            time_textbox.Foreground = new SolidColorBrush(my);
         }
 
-        private void UpdateFromTime(object time)
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            MessageBox.Show("I'm heeeere :)");
+            int n = processes_listview.Items.Count;
+            for (int i = 0; i < n; i++)
+            {
+                string procName = processes_listview.Items[i].ToString();
+                KillProcessByName(procName);
+            }
         }
 
         private void InitializeConfig()
@@ -72,7 +84,6 @@ namespace ExcessProcessKiller
                 InitializePreset("isDebug", "true");
             }
             InitializeElements();
-            from_file_checkbox.IsChecked = isFromFile;
         }
 
         private void InitializeElements()
@@ -95,6 +106,10 @@ namespace ExcessProcessKiller
                 file_processes_label.Visibility = Visibility.Hidden;
             }
             time_textbox.MaxLength = 8;
+            from_file_checkbox.IsChecked = isFromFile;
+            time_textbox.Text = time.ToString();
+            timer_checkbox.IsChecked = isFromTime;
+            time_textbox.IsEnabled = isFromTime;
         }
 
         private void InitializePreset(string key, string value)
@@ -155,6 +170,7 @@ namespace ExcessProcessKiller
                 }
             }
             InitializeElements();
+            processes_label.Content = $"Процессы: {processes_listview.Items.Count}";
         }
 
         private void from_file_checkbox_Click(object sender, RoutedEventArgs e)
@@ -172,12 +188,22 @@ namespace ExcessProcessKiller
                 string procName = processes_listview.SelectedItems[i].ToString();
                 KillProcessByName(procName);
             }
+            InitializeProcesses();
         }
 
         private void KillProcessByName(string name)
         {
-            name = name.Replace("System.Windows.Controls.ListViewItem: ", "");
-            if (isDebug) { MessageBox.Show($"{name} - to kill!", "Debug", MessageBoxButton.OK); }
+            try
+            {
+                name = name.Replace("System.Windows.Controls.ListViewItem: ", "");
+                if (isDebug) { MessageBox.Show($"{name} - to kill!", "Debug", MessageBoxButton.OK); }
+                Process[] Procs = Process.GetProcessesByName(name);
+                for (int i = 0; i < Procs.Length; i++)
+                {
+                    Procs[i].Kill();
+                }
+            }
+            catch (Win32Exception) { if (isFromTime != true) { MessageBox.Show("You don't have permission to kill me!", $"{name}"); } }
         }
 
         private void time_textbox_TextChanged(object sender, TextChangedEventArgs e)
@@ -192,7 +218,60 @@ namespace ExcessProcessKiller
 
         private void timer_checkbox_Click(object sender, RoutedEventArgs e)
         {
+            isFromTime = timer_checkbox.IsChecked.Value;
+            InitializePreset("isFromTime", isFromTime.ToString());
             InitializeTimer();
+            InitializeElements();
+            if (isDebug) { MessageBox.Show($"isFromTime - {isFromTime}!", "Debug", MessageBoxButton.OK); }
+        }
+
+        private void time_textbox_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter) 
+            {
+                time = int.Parse(time_textbox.Text);
+                if (isDebug) { MessageBox.Show($"Save time[{time}]!", "Debug", MessageBoxButton.OK); }
+                InitializePreset("time", time.ToString());
+            }
+            InitializeTimer();
+        }
+
+        private void update_process_button_Click(object sender, RoutedEventArgs e)
+        {
+            InitializeProcesses();
+        }
+
+        private void Window_StateChanged(object sender, EventArgs e)
+        {
+            if (WindowState == WindowState.Minimized)
+            {
+                Hide();
+            }
+            else { lastState = WindowState; }
+        }
+
+        private void TaskbarIcon_TrayLeftMouseDown(object sender, RoutedEventArgs e)
+        {
+            Show();
+            this.WindowState = lastState;
+        }
+
+        private void exit_of_tray_Click(object sender, RoutedEventArgs e)
+        {
+            //Close();
+            App.Current.Shutdown();
+        }
+
+        private void select_file_button_Click(object sender, RoutedEventArgs e)
+        {
+            OpenFileDialog OFD = new OpenFileDialog();
+            OFD.Filter = "Текстовые документы(*.txt)|*.txt|Все файлы(*.*)|*.*";
+            if (OFD.ShowDialog() == true)
+            {
+                procsPath = OFD.FileName;
+            }
+            else { procsPath = "null"; }
+            InitializeProcesses();
         }
 
         private void kill_all_button_Click(object sender, RoutedEventArgs e)
@@ -203,17 +282,6 @@ namespace ExcessProcessKiller
                 string procName = processes_listview.Items[i].ToString();
                 KillProcessByName(procName);
             }
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            OpenFileDialog OFD = new OpenFileDialog();
-            OFD.Filter = "Текстовые документы(*.txt)|*.txt|Все файлы(*.*)|*.*";
-            if (OFD.ShowDialog() == true) 
-            {
-                procsPath = OFD.FileName;
-            }
-            else { procsPath = "null"; }
             InitializeProcesses();
         }
     }
