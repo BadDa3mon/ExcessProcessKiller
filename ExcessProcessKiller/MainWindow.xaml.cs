@@ -42,12 +42,15 @@ namespace ExcessProcessKiller
                 int last = path.LastIndexOf('\u005c') + 1;
                 path = path.Remove(last);
                 path += "Hardcodet.Wpf.TaskbarNotification.dll";
-                if (File.Exists(path) != true) { File.WriteAllBytes(path, Properties.Resources.Hardcodet_Wpf_TaskbarNotification); }
-                else { MessageBox.Show("File is exist!"); }
-                MessageBox.Show($"You path = {path}");
+                if (File.Exists(path) != true)
+                {
+                    if (isDebug) { MessageBox.Show("File not exist, i'm created!"); }
+                    File.WriteAllBytes(path, Properties.Resources.Hardcodet_Wpf_TaskbarNotification);
+                }
+                else { if (isDebug) { MessageBox.Show($"{path} is exist!"); } }
             }
-            catch (UnauthorizedAccessException) { MessageBox.Show($"You don't have permissions to create files along this path: E:/Sharp"); }
-            catch (IOException e) { MessageBox.Show($"Exception: {e.Message}"); }
+            catch (UnauthorizedAccessException) { if (isDebug) { MessageBox.Show($"You don't have permissions to create files along this path: {path}"); } }
+            catch (IOException e) { if (isDebug) { MessageBox.Show($"Exception: {e.Message}"); } }
         }
 
         private void InitializeTimer()
@@ -69,7 +72,7 @@ namespace ExcessProcessKiller
                 }
                 else
                 { 
-                    if(isDebug) { MessageBox.Show("Time = -1, please replace!", "Debug"); }
+                    if (isDebug) { MessageBox.Show("Time = -1, please replace!", "Debug"); }
                     my = (Color)ColorConverter.ConvertFromString("#FFFF0000");
                 }
             }
