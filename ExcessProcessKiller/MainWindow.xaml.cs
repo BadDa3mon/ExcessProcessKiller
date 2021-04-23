@@ -105,7 +105,7 @@ namespace ExcessProcessKiller
                 InitializePreset("isFromTime", "false");
                 InitializePreset("time", "-1");
                 InitializePreset("procsPath", "null");
-                InitializePreset("isDebug", "true");
+                InitializePreset("isDebug", "false");
             }
             InitializeElements();
         }
