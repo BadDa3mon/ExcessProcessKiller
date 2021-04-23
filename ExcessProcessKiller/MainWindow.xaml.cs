@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 using System.Timers;
 using System.ComponentModel;
 using System.Windows.Media;
+using System.Reflection;
+using System.Resources;
+using System.IO;
 
 namespace ExcessProcessKiller
 {
@@ -24,10 +27,27 @@ namespace ExcessProcessKiller
         WindowState lastState;
         public MainWindow()
         {
+            InitializeLibrary();
             InitializeComponent();
             InitializeConfig();
             InitializeTimer();
             InitializeProcesses();
+        }
+
+        private void InitializeLibrary()
+        {
+            string path = Assembly.GetExecutingAssembly().Location;
+            try
+            {
+                int last = path.LastIndexOf('\u005c') + 1;
+                path = path.Remove(last);
+                path += "Hardcodet.Wpf.TaskbarNotification.dll";
+                if (File.Exists(path) != true) { File.WriteAllBytes(path, Properties.Resources.Hardcodet_Wpf_TaskbarNotification); }
+                else { MessageBox.Show("File is exist!"); }
+                MessageBox.Show($"You path = {path}");
+            }
+            catch (UnauthorizedAccessException) { MessageBox.Show($"You don't have permissions to create files along this path: E:/Sharp"); }
+            catch (IOException e) { MessageBox.Show($"Exception: {e.Message}"); }
         }
 
         private void InitializeTimer()
@@ -37,13 +57,17 @@ namespace ExcessProcessKiller
             {
                 if (time != -1)
                 {
-                    timer = new Timer(time * 1000 * 60);
-                    timer.Elapsed += OnTimedEvent;
-                    timer.AutoReset = true;
-                    timer.Enabled = true;
-                    my = (Color)ColorConverter.ConvertFromString("#FF000000");
+                    if (time == 0) { InitializeConfig(); }
+                    else
+                    {
+                        timer = new Timer(time * 1000 * 60);
+                        timer.Elapsed += OnTimedEvent;
+                        timer.AutoReset = true;
+                        timer.Enabled = true;
+                        my = (Color)ColorConverter.ConvertFromString("#FF000000");
+                    }
                 }
-                else 
+                else
                 { 
                     if(isDebug) { MessageBox.Show("Time = -1, please replace!", "Debug"); }
                     my = (Color)ColorConverter.ConvertFromString("#FFFF0000");
@@ -105,7 +129,7 @@ namespace ExcessProcessKiller
                 select_file_button.Visibility = Visibility.Hidden;
                 file_processes_label.Visibility = Visibility.Hidden;
             }
-            time_textbox.MaxLength = 8;
+            time_textbox.MaxLength = 4;
             from_file_checkbox.IsChecked = isFromFile;
             time_textbox.Text = time.ToString();
             timer_checkbox.IsChecked = isFromTime;
@@ -132,10 +156,10 @@ namespace ExcessProcessKiller
             processes_listview.Items.Clear();
             if (isFromFile && procsPath != "null")
             {
-                if (procsPath != "null")
+                if (procsPath != "null" && procsPath != null)
                 {
                     InitializePreset("procsPath", procsPath);
-                    string allProcess = System.IO.File.ReadAllText(procsPath);
+                    string allProcess = File.ReadAllText(procsPath);
                     string[] processes = allProcess.Split(';'); int ind;
                     for (int i = 0; i < processes.Length; i++)
                     {
@@ -208,11 +232,16 @@ namespace ExcessProcessKiller
 
         private void time_textbox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string reg = @"\b[0-9]{1,}\b";
-            if (Regex.IsMatch(time_textbox.Text, reg) != true) 
+            string reg = @"\b[0-9]{1,}\b"; TextBox newBox = (TextBox)sender;
+            if (Regex.IsMatch(newBox.Text, reg) != true) 
             {
                 time_textbox.Clear();
                 MessageBox.Show($"Please, input only digits!", "Debug", MessageBoxButton.OK);
+            }
+            else 
+            { 
+                time = int.Parse(newBox.Text);
+                InitializePreset("time", time.ToString());
             }
         }
 

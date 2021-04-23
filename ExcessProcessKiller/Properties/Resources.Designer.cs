@@ -59,5 +59,15 @@ namespace ExcessProcessKiller.Properties {
                 resourceCulture = value;
             }
         }
+        
+        /// <summary>
+        ///   Поиск локализованного ресурса типа System.Byte[].
+        /// </summary>
+        public static byte[] Hardcodet_Wpf_TaskbarNotification {
+            get {
+                object obj = ResourceManager.GetObject("Hardcodet_Wpf_TaskbarNotification", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }

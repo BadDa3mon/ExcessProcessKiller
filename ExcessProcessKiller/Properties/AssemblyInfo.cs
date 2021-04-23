@@ -8,9 +8,9 @@ using System.Windows;
 // набор атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
 [assembly: AssemblyTitle("ExcessProcessKiller")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("Программа предназначена для уничтожения сторонних процессов по истечению времени")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("BadDa3mon")]
 [assembly: AssemblyProduct("ExcessProcessKiller")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
