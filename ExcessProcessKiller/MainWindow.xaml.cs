@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Reflection;
 using System.Resources;
 using System.IO;
+using System.Threading;
 
 namespace ExcessProcessKiller
 {
@@ -28,7 +29,7 @@ namespace ExcessProcessKiller
         public bool isFromFile, isDebug, isFromTime;
         public int time;
         public string procsPath;
-        public Timer timer;
+        public System.Timers.Timer timer;
         WindowState lastState;
         public MainWindow()
         {
@@ -68,7 +69,7 @@ namespace ExcessProcessKiller
                     if (time == 0) { InitializeConfig(); }
                     else
                     {
-                        timer = new Timer(time * 1000 * 60);
+                        timer = new System.Timers.Timer(time * 1000 * 60);
                         timer.Elapsed += OnTimedEvent;
                         timer.AutoReset = true;
                         timer.Enabled = true;
@@ -88,12 +89,13 @@ namespace ExcessProcessKiller
 
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            int n = processes_listview.Items.Count;
+            /*int n = processes_listview.Items.Count;
             for (int i = 0; i < n; i++)
             {
                 string procName = processes_listview.Items[i].ToString();
                 KillProcessByName(procName);
-            }
+            }*/
+            this.Dispatcher.Invoke(() => { kill_all_button_Click(this, null); });
         }
 
         private void InitializeConfig()
