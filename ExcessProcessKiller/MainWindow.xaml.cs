@@ -161,6 +161,13 @@ namespace ExcessProcessKiller
             {
                 if (procsPath != "null" && procsPath != null)
                 {
+                    if (File.Exists(procsPath) != true)
+                    {
+                        MessageBox.Show($"File {procsPath} not exists! Select .txt file again");
+                        procsPath = "null";
+                        InitializePreset("procsPath", procsPath); InitializeElements();
+                        return;
+                    }
                     InitializePreset("procsPath", procsPath);
                     string allProcess = File.ReadAllText(procsPath);
                     string[] processes = allProcess.Split(';'); int ind;
@@ -264,6 +271,7 @@ namespace ExcessProcessKiller
                 time = int.Parse(time_textbox.Text);
                 if (isDebug) { MessageBox.Show($"Save time[{time}]!", "Debug", MessageBoxButton.OK); }
                 InitializePreset("time", time.ToString());
+                Keyboard.ClearFocus();
             }
             InitializeTimer();
         }

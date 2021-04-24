@@ -50,11 +50,10 @@
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="292*"/>
-            <ColumnDefinition Width="173*"/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Label x:Name="processes_label" Content="Процессы:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="35" Width="151" FontSize="18"/>
-        <ListView x:Name="processes_listview" HorizontalAlignment="Left" Height="155" Margin="12,45,0,0" VerticalAlignment="Top" Width="303" ToolTip="" Grid.ColumnSpan="2">
+        <ListView x:Name="processes_listview" HorizontalAlignment="Left" Height="155" Margin="12,45,0,0" VerticalAlignment="Top" Width="303" ToolTip="">
             <ListView.View>
                 <GridView>
                     <GridViewColumn x:Name="grid_process_name">
@@ -62,15 +61,15 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Button x:Name="select_file_button" HorizontalAlignment="Left" Margin="285,15,0,0" VerticalAlignment="Top" Width="30" Height="30" Click="select_file_button_Click" Style="{DynamicResource ButtonImageStyle}" ToolTip="Кнопка импорта файла" Grid.ColumnSpan="2" />
+        <Button x:Name="select_file_button" HorizontalAlignment="Left" Margin="285,15,0,0" VerticalAlignment="Top" Width="30" Height="30" Click="select_file_button_Click" Style="{DynamicResource ButtonImageStyle}" ToolTip="Кнопка импорта файла" />
         <Label x:Name="file_processes_label" Content="Файл: " HorizontalAlignment="Left" Margin="7,212,0,0" VerticalAlignment="Top" Background="#00000000" Foreground="#FF606060"/>
         <CheckBox x:Name="from_file_checkbox" Content="Импорт из файла" HorizontalAlignment="Left" Margin="11,202,0,0" VerticalAlignment="Top" Click="from_file_checkbox_Click" ToolTip="Импорт текстового документа с названиями процессов" />
-        <Button x:Name="kill_selected_button" Content="Убить" HorizontalAlignment="Left" Margin="36.8,175,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_selected_button_Click" ToolTip="Убить все выделенные процессы" Grid.Column="1"/>
-        <Button x:Name="kill_all_button" Content="Убить все" HorizontalAlignment="Left" Margin="36.8,145,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_all_button_Click" ToolTip="Убить все процессы находящиеся в списке" Grid.Column="1"/>
-        <CheckBox x:Name="timer_checkbox" Content="Таймер" HorizontalAlignment="Left" Margin="36.8,45,0,0" VerticalAlignment="Top" Click="timer_checkbox_Click" Grid.Column="1"/>
-        <TextBox x:Name="time_textbox" HorizontalAlignment="Left" Height="18" Margin="36.8,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="103" TextChanged="time_textbox_TextChanged" Text="-1" KeyUp="time_textbox_KeyUp" ToolTip="Время между убийствами процессов (в минутах)" Grid.Column="1"/>
-        <Button x:Name="update_process_button" Content="Обновить" HorizontalAlignment="Left" Margin="36.8,115,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="update_process_button_Click" ToolTip="Обновить все процессы" Grid.Column="1"/>
-        <tb:TaskbarIcon Visibility="Visible" ToolTipText="ExcessProcessKiller" IconSource="process_icon.ico" Grid.ColumnSpan="2" Margin="0,0,-0.2,-0.2" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown" PopupActivation="RightClick" >
+        <Button x:Name="kill_selected_button" Content="Убить" HorizontalAlignment="Left" Margin="329,175,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_selected_button_Click" ToolTip="Убить все выделенные процессы"/>
+        <Button x:Name="kill_all_button" Content="Убить все" HorizontalAlignment="Left" Margin="329,145,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_all_button_Click" ToolTip="Убить все процессы находящиеся в списке"/>
+        <CheckBox x:Name="timer_checkbox" Content="Таймер" HorizontalAlignment="Left" Margin="329,45,0,0" VerticalAlignment="Top" Click="timer_checkbox_Click"/>
+        <TextBox x:Name="time_textbox" HorizontalAlignment="Left" Height="18" Margin="329,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="103" TextChanged="time_textbox_TextChanged" Text="-1" KeyUp="time_textbox_KeyUp" ToolTip="Время между убийствами процессов (в минутах)"/>
+        <Button x:Name="update_process_button" Content="Обновить" HorizontalAlignment="Left" Margin="329,115,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="update_process_button_Click" ToolTip="Обновить все процессы"/>
+        <tb:TaskbarIcon Visibility="Visible" ToolTipText="ExcessProcessKiller" IconSource="process_icon.ico" Margin="0,0,-0.2,-0.2" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown" PopupActivation="RightClick" >
             <tb:TaskbarIcon.TrayPopup>
                 <Button x:Name="exit_of_tray" Width="70" Height="25" Content="Закрыть" Click="exit_of_tray_Click" />
             </tb:TaskbarIcon.TrayPopup>
