@@ -9,6 +9,10 @@
         Title="ExcessProcessKiller" Height="278.623" Width="471.545" Icon="process_icon_transparent_color.png" ResizeMode="CanMinimize" StateChanged="Window_StateChanged">
     <Window.Resources>
         <BitmapImage x:Key="SelectFileImage" CreateOptions="IgnoreImageCache" CacheOption="OnLoad" UriSource="choosefile.png"/>
+        <Style x:Key="NoResizeColumnStyle" TargetType="{x:Type GridViewColumnHeader}">
+            <Setter Property="Foreground" Value="#FF000000"/>
+            <Setter Property="IsHitTestVisible" Value="False"/>
+        </Style>
         <Style x:Key="ButtonImageStyle" TargetType="{x:Type Button}">
             <Setter Property="FocusVisualStyle" Value="{StaticResource FocusVisual}"/>
             <Setter Property="Background" Value="{StaticResource Button.Static.Background}"/>
@@ -53,11 +57,11 @@
             <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Label x:Name="processes_label" Content="Процессы:" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top" Height="35" Width="151" FontSize="18"/>
-        <ListView x:Name="processes_listview" HorizontalAlignment="Left" Height="155" Margin="12,45,0,0" VerticalAlignment="Top" Width="303" ToolTip="">
+        <ListView x:Name="processes_listview" HorizontalAlignment="Left" Height="155" Margin="12,45,0,0" VerticalAlignment="Top" Width="303">
             <ListView.View>
                 <GridView>
-                    <GridViewColumn x:Name="grid_process_name">
-                    </GridViewColumn>
+                    <GridViewColumn Header="Название" Width="138" DisplayMemberBinding="{Binding Name}" HeaderContainerStyle="{DynamicResource NoResizeColumnStyle}"/>
+                    <GridViewColumn Header="ОЗУ" Width="138" DisplayMemberBinding="{Binding RAM}" HeaderContainerStyle="{DynamicResource NoResizeColumnStyle}"/>
                 </GridView>
             </ListView.View>
         </ListView>

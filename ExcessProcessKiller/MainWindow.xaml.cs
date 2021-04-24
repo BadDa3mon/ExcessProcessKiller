@@ -18,6 +18,11 @@ namespace ExcessProcessKiller
     /// <summary>
     /// Логика взаимодействия для MainWindow.xaml
     /// </summary>
+    public class NewItem
+    {
+        public string RAM { get; set; }
+        public string Name { get; set; }
+    }
     public partial class MainWindow : Window
     {
         public bool isFromFile, isDebug, isFromTime;
@@ -179,10 +184,11 @@ namespace ExcessProcessKiller
                             if (proc != null)
                             {
                                 ListViewItem item = new ListViewItem();
-                                item.Content = processes[i];
-                                ind = i;
-                                processes_listview.Items.Add(item);
+                                long ram = proc.WorkingSet64 / 1024;
+                                ind = i; 
+                                processes_listview.Items.Add(new NewItem { Name = processes[i], RAM = $"{ram} K" });
                             }
+                            proc.Dispose();
                         }
                         catch (IndexOutOfRangeException) { if (isDebug) { MessageBox.Show($"Process with name {processes[i]} not exist!", "Debug!", MessageBoxButton.OK); } }
                     }
@@ -199,7 +205,8 @@ namespace ExcessProcessKiller
                     {
                         ListViewItem item = new ListViewItem();
                         item.Content = procs[i].ProcessName;
-                        processes_listview.Items.Add(item);
+                        long ram = procs[i].WorkingSet64 / 1024;
+                        processes_listview.Items.Add(new NewItem { Name = procs[i].ProcessName, RAM = $"{ram} K" });
                     }
                 }
             }
@@ -219,7 +226,8 @@ namespace ExcessProcessKiller
             int n = processes_listview.SelectedItems.Count;
             for (int i = 0; i < n; i++)
             {
-                string procName = processes_listview.SelectedItems[i].ToString();
+                NewItem my = (NewItem)processes_listview.SelectedItems[i];
+                string procName = my.Name;
                 KillProcessByName(procName);
             }
             InitializeProcesses();
@@ -229,7 +237,6 @@ namespace ExcessProcessKiller
         {
             try
             {
-                name = name.Replace("System.Windows.Controls.ListViewItem: ", "");
                 if (isDebug) { MessageBox.Show($"{name} - to kill!", "Debug", MessageBoxButton.OK); }
                 Process[] Procs = Process.GetProcessesByName(name);
                 for (int i = 0; i < Procs.Length; i++)
@@ -319,7 +326,8 @@ namespace ExcessProcessKiller
             int n = processes_listview.Items.Count;
             for (int i = 0; i < n; i++)
             {
-                string procName = processes_listview.Items[i].ToString();
+                NewItem my = (NewItem)processes_listview.Items[i];
+                string procName = my.Name;
                 KillProcessByName(procName);
             }
             InitializeProcesses();
