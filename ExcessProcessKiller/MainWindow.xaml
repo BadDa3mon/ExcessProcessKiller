@@ -6,7 +6,7 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         xmlns:local="clr-namespace:ExcessProcessKiller"
         mc:Ignorable="d"
-        Title="ExcessProcessKiller" Height="278.623" Width="471.545" Icon="process_icon_transparent_color.png" ResizeMode="CanMinimize" StateChanged="Window_StateChanged">
+        Title="ExcessProcessKiller" Height="267.423" Width="461.145" Icon="process_icon_transparent_color.png" ResizeMode="CanMinimize" StateChanged="Window_StateChanged">
     <Window.Resources>
         <BitmapImage x:Key="SelectFileImage" CreateOptions="IgnoreImageCache" CacheOption="OnLoad" UriSource="choosefile.png"/>
         <Style x:Key="NoResizeColumnStyle" TargetType="{x:Type GridViewColumnHeader}">
@@ -80,5 +80,6 @@
         </tb:TaskbarIcon>
         <Label x:Name="time_type_title" Content="мин" HorizontalAlignment="Left" Margin="396,64,0,0" VerticalAlignment="Top" MouseDown="time_type_title_MouseDown"/>
         <ProgressBar x:Name="timer_progress_bar" HorizontalAlignment="Left" Height="15" Margin="329,88,0,0" VerticalAlignment="Top" Width="103"/>
+        <CheckBox x:Name="autorun_checkbox" Content="Автозапуск" HorizontalAlignment="Left" Margin="329,30,0,0" VerticalAlignment="Top" Click="autorun_checkbox_Click"/>
     </Grid>
 </Window>

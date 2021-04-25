@@ -25,7 +25,7 @@ namespace ExcessProcessKiller
     }
     public partial class MainWindow : Window
     {
-        public bool isFromFile, isDebug, isFromTime;
+        public bool isFromFile, isDebug, isFromTime, AutoRun, isAdmin;
         public int time, timeType, interval;
         public string procsPath;
         public Timer timer, progress;
@@ -55,7 +55,17 @@ namespace ExcessProcessKiller
                 else { if (isDebug) { MessageBox.Show($"{path} is exist!"); } }
             }
             catch (UnauthorizedAccessException) { if (isDebug) { MessageBox.Show($"You don't have permissions to create files along this path: {path}"); } }
-            catch (IOException e) { MessageBox.Show($"Exception: {e.Message}"); }
+            catch (Exception e) { MessageBox.Show($"Error: {e.Message}!\nTry to run the program as administrator", "Debug"); }
+            HideLibrary();
+        }
+
+        private void HideLibrary()
+        {
+            string path = Assembly.GetExecutingAssembly().Location;
+            int n = path.LastIndexOf("\u005c") + 1;
+            path = path.Remove(n);
+            path += "Hardcodet.Wpf.TaskbarNotification.dll";
+            File.SetAttributes(path, FileAttributes.Hidden);
         }
 
         private void InitializeTimer()
@@ -152,6 +162,7 @@ namespace ExcessProcessKiller
                 timeType = int.Parse(appSettings.Get("timeType"));
                 procsPath = appSettings.Get("procsPath");
                 isDebug = bool.Parse(appSettings.Get("isDebug"));
+                AutoRun = bool.Parse(appSettings.Get("AutoRun"));
             }
             else
             {
@@ -161,6 +172,7 @@ namespace ExcessProcessKiller
                 InitializePreset("timeType", "1");
                 InitializePreset("procsPath", "null");
                 InitializePreset("isDebug", "false");
+                InitializePreset("AutoRun", "false");
             }
             InitializeElements();
         }
@@ -190,6 +202,7 @@ namespace ExcessProcessKiller
             time_textbox.Text = time.ToString();
             timer_checkbox.IsChecked = isFromTime;
             time_textbox.IsEnabled = isFromTime;
+            autorun_checkbox.IsChecked = AutoRun;
             string title = "";
             switch (timeType)
             {
@@ -354,6 +367,35 @@ namespace ExcessProcessKiller
                 Hide();
             }
             else { lastState = WindowState; }
+        }
+
+        private void autorun_checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            InitializePreset("AutoRun", autorun_checkbox.IsChecked.Value.ToString());
+            AutoRun = autorun_checkbox.IsChecked.Value;
+            try
+            {
+                if (AutoRun)
+                {
+                    RegistryKey myKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\u005cMicrosoft\u005cWindows\u005cCurrentVersion\u005cRun", true);
+                    string path = Assembly.GetExecutingAssembly().Location;
+                    myKey.SetValue("ExcessProcessKiller", path);
+                }
+                else
+                {
+                    RegistryKey myKey = Registry.LocalMachine.OpenSubKey("SOFTWARE\u005cMicrosoft\u005cWindows\u005cCurrentVersion\u005cRun", true);
+                    myKey.DeleteValue("ExcessProcessKiller");
+                }
+            }
+            catch (UnauthorizedAccessException exc)
+            { 
+                MessageBox.Show($"Error: {exc.Message}\nTry to run the program as administrator", "Debug");
+                if (AutoRun)
+                {
+                    autorun_checkbox.IsChecked = false; AutoRun = false;
+                }
+                InitializePreset("AutoRun", AutoRun.ToString());
+            }
         }
 
         private void TaskbarIcon_TrayLeftMouseDown(object sender, RoutedEventArgs e)

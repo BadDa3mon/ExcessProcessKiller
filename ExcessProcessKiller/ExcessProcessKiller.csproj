@@ -162,7 +162,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Check\Hardcodet.Wpf.TaskbarNotification.dll" />
+    <EmbeddedResource Include="Lib\Hardcodet.Wpf.TaskbarNotification.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
