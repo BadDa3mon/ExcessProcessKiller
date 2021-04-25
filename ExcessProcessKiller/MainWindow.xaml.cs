@@ -10,9 +10,7 @@ using System.Timers;
 using System.ComponentModel;
 using System.Windows.Media;
 using System.Reflection;
-using System.Resources;
 using System.IO;
-using System.Threading;
 
 namespace ExcessProcessKiller
 {
@@ -27,9 +25,9 @@ namespace ExcessProcessKiller
     public partial class MainWindow : Window
     {
         public bool isFromFile, isDebug, isFromTime;
-        public int time;
+        public int time, timeType;
         public string procsPath;
-        public System.Timers.Timer timer;
+        public Timer timer;
         WindowState lastState;
         public MainWindow()
         {
@@ -69,10 +67,22 @@ namespace ExcessProcessKiller
                     if (time == 0) { InitializeConfig(); }
                     else
                     {
-                        timer = new System.Timers.Timer(time * 1000 * 60);
-                        timer.Elapsed += OnTimedEvent;
-                        timer.AutoReset = true;
-                        timer.Enabled = true;
+                        int convert = 0;
+                        switch (timeType)
+                        {
+                            case 0: convert = 1; break;
+                            case 1: convert = 60; break;
+                            case 2: convert = 3600; break;
+                        }
+                        int interval = time * convert * 1000;
+                        if (timer != null && timer.Enabled) { timer.Interval = interval; }
+                        else
+                        {
+                            timer = new Timer(interval);
+                            timer.Elapsed += OnTimedEvent;
+                            timer.AutoReset = true;
+                            timer.Enabled = true;
+                        }
                         my = (Color)ColorConverter.ConvertFromString("#FF000000");
                     }
                 }
@@ -82,7 +92,7 @@ namespace ExcessProcessKiller
                     my = (Color)ColorConverter.ConvertFromString("#FFFF0000");
                 }
             }
-            else if (timer != null) { timer.Dispose(); }
+            else if (timer != null) { timer.Close(); }
             else { if (isDebug) { MessageBox.Show($"Timer is null, isFromTime - {isFromTime}!", "Debug", MessageBoxButton.OK); } }
             time_textbox.Foreground = new SolidColorBrush(my);
         }
@@ -95,7 +105,11 @@ namespace ExcessProcessKiller
                 string procName = processes_listview.Items[i].ToString();
                 KillProcessByName(procName);
             }*/
-            this.Dispatcher.Invoke(() => { kill_all_button_Click(this, null); });
+            this.Dispatcher.Invoke(() => { 
+                kill_all_button_Click(this, null);
+                if (timer_progress_bar.Value != 10) { timer_progress_bar.Value++; }
+                else { timer_progress_bar.Value = 0; }
+            });
         }
 
         private void InitializeConfig()
@@ -106,6 +120,7 @@ namespace ExcessProcessKiller
                 isFromFile = bool.Parse(appSettings.Get("isFromFile"));
                 isFromTime = bool.Parse(appSettings.Get("isFromTime"));
                 time = int.Parse(appSettings.Get("time"));
+                timeType = int.Parse(appSettings.Get("timeType"));
                 procsPath = appSettings.Get("procsPath");
                 isDebug = bool.Parse(appSettings.Get("isDebug"));
             }
@@ -114,6 +129,7 @@ namespace ExcessProcessKiller
                 InitializePreset("isFromFile", "false");
                 InitializePreset("isFromTime", "false");
                 InitializePreset("time", "-1");
+                InitializePreset("timeType", "0");
                 InitializePreset("procsPath", "null");
                 InitializePreset("isDebug", "false");
             }
@@ -140,10 +156,17 @@ namespace ExcessProcessKiller
                 file_processes_label.Visibility = Visibility.Hidden;
             }
             time_textbox.MaxLength = 4;
+            timer_progress_bar.Maximum = 10;
             from_file_checkbox.IsChecked = isFromFile;
             time_textbox.Text = time.ToString();
             timer_checkbox.IsChecked = isFromTime;
             time_textbox.IsEnabled = isFromTime;
+            switch (timeType)
+            {
+                case 0: time_type_title.Content = "сек"; break;
+                case 1: time_type_title.Content = "мин"; break;
+                case 2: time_type_title.Content = "час"; break;
+            }
         }
 
         private void InitializePreset(string key, string value)
@@ -281,8 +304,8 @@ namespace ExcessProcessKiller
                 if (isDebug) { MessageBox.Show($"Save time[{time}]!", "Debug", MessageBoxButton.OK); }
                 InitializePreset("time", time.ToString());
                 Keyboard.ClearFocus();
+                InitializeTimer();
             }
-            InitializeTimer();
         }
 
         private void update_process_button_Click(object sender, RoutedEventArgs e)
@@ -309,6 +332,21 @@ namespace ExcessProcessKiller
         {
             //Close();
             App.Current.Shutdown();
+        }
+
+        private void time_type_title_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            Label send = (Label)sender; int i = 0;
+            string[] titles = { "сек", "мин", "час" };
+            switch (send.Content)
+            {
+                case "сек": i = 1; break;
+                case "мин": i = 2; break;
+                case "час": i = 0; break;
+            }
+            send.Content = titles[i];
+            timeType = i; InitializePreset("timeType", i.ToString());
+            InitializeTimer();
         }
 
         private void select_file_button_Click(object sender, RoutedEventArgs e)
