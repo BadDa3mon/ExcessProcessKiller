@@ -55,17 +55,17 @@ namespace ExcessProcessKiller
                 else { if (isDebug) { MessageBox.Show($"{path} is exist!"); } }
             }
             catch (UnauthorizedAccessException) { if (isDebug) { MessageBox.Show($"You don't have permissions to create files along this path: {path}"); } }
-            catch (IOException e) { if (isDebug) { MessageBox.Show($"Exception: {e.Message}"); } }
+            catch (IOException e) { MessageBox.Show($"Exception: {e.Message}"); }
         }
 
         private void InitializeTimer()
         {
-            Color my = new Color();
+            Color my = (Color)ColorConverter.ConvertFromString("#FF000000");
             if (isFromTime)
             {
                 if (time != -1)
                 {
-                    if (time == 0) { InitializeConfig(); }
+                    if (time == 0) { InitializeConfig(); time_textbox.Text = ""; }
                     else
                     {
                         int convert = 0;
@@ -101,7 +101,7 @@ namespace ExcessProcessKiller
 
         private void InitializeProgressBar()
         {
-            if (isFromTime)
+            if (isFromTime && interval != 0)
             {
                 if (progress != null && progress.Enabled)
                 {
@@ -117,10 +117,10 @@ namespace ExcessProcessKiller
                 timer_progress_bar.IsEnabled = true;
                 timer_progress_bar.ToolTip = $"Интервал: {progress.Interval}";
             }
-            else 
-            { 
+            else
+            {
+                if (progress != null) { progress.Close(); }
                 timer_progress_bar.ToolTip = $"Выключено";
-                progress.Close();
                 timer_progress_bar.IsEnabled = false;
                 timer_progress_bar.Value = 0;
             }   
@@ -141,7 +141,6 @@ namespace ExcessProcessKiller
             this.Dispatcher.Invoke(() => {
                 kill_all_button_Click(this, null); });
         }
-
         private void InitializeConfig()
         {
             var appSettings = ConfigurationManager.AppSettings;
@@ -159,7 +158,7 @@ namespace ExcessProcessKiller
                 InitializePreset("isFromFile", "false");
                 InitializePreset("isFromTime", "false");
                 InitializePreset("time", "-1");
-                InitializePreset("timeType", "0");
+                InitializePreset("timeType", "1");
                 InitializePreset("procsPath", "null");
                 InitializePreset("isDebug", "false");
             }
@@ -198,7 +197,7 @@ namespace ExcessProcessKiller
                 case 1: title = "мин"; break;
                 case 2: title = "час"; break;
             }
-            time_type_title.Content = title; time_textbox.ToolTip = $"Время между убийствами процессов(в {title})";
+            time_type_title.Content = title; time_textbox.ToolTip = $"Время между убийствами процессов (в {title})";
         }
 
         private void InitializePreset(string key, string value)
@@ -221,11 +220,11 @@ namespace ExcessProcessKiller
             processes_listview.Items.Clear();
             if (isFromFile && procsPath != "null")
             {
-                if (procsPath != "null" && procsPath != null)
+                if (procsPath != null)
                 {
                     if (File.Exists(procsPath) != true)
                     {
-                        MessageBox.Show($"File {procsPath} not exists! Select .txt file again");
+                        MessageBox.Show($"File {procsPath} not exists! Select .txt file again", "Error!");
                         procsPath = "null";
                         InitializePreset("procsPath", procsPath); InitializeElements();
                         return;
@@ -242,7 +241,7 @@ namespace ExcessProcessKiller
                             {
                                 ListViewItem item = new ListViewItem();
                                 long ram = proc.WorkingSet64 / 1024;
-                                ind = i; 
+                                ind = i;
                                 processes_listview.Items.Add(new NewItem { Name = processes[i], RAM = $"{ram} K" });
                             }
                             proc.Dispose();
@@ -250,7 +249,7 @@ namespace ExcessProcessKiller
                         catch (IndexOutOfRangeException) { if (isDebug) { MessageBox.Show($"Process with name {processes[i]} not exist!", "Debug!", MessageBoxButton.OK); } }
                     }
                 }
-                else { if (isDebug) { MessageBox.Show($"{procsPath} - not exist!", "Debug", MessageBoxButton.OK); } }
+                else { if (isDebug) { MessageBox.Show($"Path '{procsPath}' - not exist!", "Error!", MessageBoxButton.OK); } }
                 
             }
             else
@@ -309,8 +308,9 @@ namespace ExcessProcessKiller
             string reg = @"\b[0-9]{1,}\b"; TextBox newBox = (TextBox)sender;
             if (Regex.IsMatch(newBox.Text, reg) != true) 
             {
+                if (newBox.Text == "") { return; }
+                MessageBox.Show($"Please, input only digits!", "Error!", MessageBoxButton.OK);
                 time_textbox.Clear();
-                MessageBox.Show($"Please, input only digits!", "Debug", MessageBoxButton.OK);
             }
             else 
             { 
@@ -333,7 +333,8 @@ namespace ExcessProcessKiller
         {
             if (e.Key == Key.Enter) 
             {
-                time = int.Parse(time_textbox.Text);
+                if (time_textbox.Text == null || time_textbox.Text == "") { MessageBox.Show("Please enter at least one digit!", "Error!"); }
+                else { time = int.Parse(time_textbox.Text); }
                 if (isDebug) { MessageBox.Show($"Save time[{time}]!", "Debug", MessageBoxButton.OK); }
                 InitializePreset("time", time.ToString());
                 Keyboard.ClearFocus();
