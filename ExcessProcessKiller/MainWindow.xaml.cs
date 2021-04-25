@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Windows.Media;
 using System.Reflection;
 using System.IO;
+using System.Windows.Threading;
 
 namespace ExcessProcessKiller
 {
@@ -25,9 +26,9 @@ namespace ExcessProcessKiller
     public partial class MainWindow : Window
     {
         public bool isFromFile, isDebug, isFromTime;
-        public int time, timeType;
+        public int time, timeType, interval;
         public string procsPath;
-        public Timer timer;
+        public Timer timer, progress;
         WindowState lastState;
         public MainWindow()
         {
@@ -74,7 +75,7 @@ namespace ExcessProcessKiller
                             case 1: convert = 60; break;
                             case 2: convert = 3600; break;
                         }
-                        int interval = time * convert * 1000;
+                        interval = time * convert * 1000;
                         if (timer != null && timer.Enabled) { timer.Interval = interval; }
                         else
                         {
@@ -84,6 +85,7 @@ namespace ExcessProcessKiller
                             timer.Enabled = true;
                         }
                         my = (Color)ColorConverter.ConvertFromString("#FF000000");
+                        InitializeProgressBar();
                     }
                 }
                 else
@@ -97,19 +99,47 @@ namespace ExcessProcessKiller
             time_textbox.Foreground = new SolidColorBrush(my);
         }
 
+        private void InitializeProgressBar()
+        {
+            if (isFromTime)
+            {
+                if (progress != null && progress.Enabled)
+                {
+                    progress.Interval = interval / 10;
+                }
+                else
+                {
+                    progress = new Timer(interval / 10);
+                    progress.Elapsed += OnProgressEvent;
+                    progress.AutoReset = true;
+                    progress.Enabled = true;
+                }
+                timer_progress_bar.IsEnabled = true;
+                timer_progress_bar.ToolTip = $"Интервал: {progress.Interval}";
+            }
+            else 
+            { 
+                timer_progress_bar.ToolTip = $"Выключено";
+                progress.Close();
+                timer_progress_bar.IsEnabled = false;
+                timer_progress_bar.Value = 0;
+            }   
+        }
+
+        private void OnProgressEvent(object source, ElapsedEventArgs e)
+        {
+            Action my = new Action(() =>
+            {
+                if (timer_progress_bar.Value != 10) { timer_progress_bar.Value++; }
+                else { timer_progress_bar.Value = 1; }
+            });
+            this.Dispatcher.Invoke(my);
+        }
+
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
-            /*int n = processes_listview.Items.Count;
-            for (int i = 0; i < n; i++)
-            {
-                string procName = processes_listview.Items[i].ToString();
-                KillProcessByName(procName);
-            }*/
-            this.Dispatcher.Invoke(() => { 
-                kill_all_button_Click(this, null);
-                if (timer_progress_bar.Value != 10) { timer_progress_bar.Value++; }
-                else { timer_progress_bar.Value = 0; }
-            });
+            this.Dispatcher.Invoke(() => {
+                kill_all_button_Click(this, null); });
         }
 
         private void InitializeConfig()
@@ -161,12 +191,14 @@ namespace ExcessProcessKiller
             time_textbox.Text = time.ToString();
             timer_checkbox.IsChecked = isFromTime;
             time_textbox.IsEnabled = isFromTime;
+            string title = "";
             switch (timeType)
             {
-                case 0: time_type_title.Content = "сек"; break;
-                case 1: time_type_title.Content = "мин"; break;
-                case 2: time_type_title.Content = "час"; break;
+                case 0: title = "сек"; break;
+                case 1: title = "мин"; break;
+                case 2: title = "час"; break;
             }
+            time_type_title.Content = title; time_textbox.ToolTip = $"Время между убийствами процессов(в {title})";
         }
 
         private void InitializePreset(string key, string value)
@@ -293,6 +325,7 @@ namespace ExcessProcessKiller
             InitializePreset("isFromTime", isFromTime.ToString());
             InitializeTimer();
             InitializeElements();
+            InitializeProgressBar();
             if (isDebug) { MessageBox.Show($"isFromTime - {isFromTime}!", "Debug", MessageBoxButton.OK); }
         }
 
@@ -330,7 +363,6 @@ namespace ExcessProcessKiller
 
         private void exit_of_tray_Click(object sender, RoutedEventArgs e)
         {
-            //Close();
             App.Current.Shutdown();
         }
 
@@ -363,6 +395,7 @@ namespace ExcessProcessKiller
 
         private void kill_all_button_Click(object sender, RoutedEventArgs e)
         {
+            InitializeProcesses();
             int n = processes_listview.Items.Count;
             for (int i = 0; i < n; i++)
             {

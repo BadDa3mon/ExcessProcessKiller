@@ -71,7 +71,7 @@
         <Button x:Name="kill_selected_button" Content="Убить" HorizontalAlignment="Left" Margin="329,175,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_selected_button_Click" ToolTip="Убить все выделенные процессы"/>
         <Button x:Name="kill_all_button" Content="Убить все" HorizontalAlignment="Left" Margin="329,145,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="kill_all_button_Click" ToolTip="Убить все процессы находящиеся в списке"/>
         <CheckBox x:Name="timer_checkbox" Content="Таймер" HorizontalAlignment="Left" Margin="329,45,0,0" VerticalAlignment="Top" Click="timer_checkbox_Click"/>
-        <TextBox x:Name="time_textbox" HorizontalAlignment="Left" Height="18" Margin="329,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" TextChanged="time_textbox_TextChanged" Text="-1" KeyUp="time_textbox_KeyUp" ToolTip="Время между убийствами процессов (в минутах)"/>
+        <TextBox x:Name="time_textbox" HorizontalAlignment="Left" Height="18" Margin="329,65,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="69" TextChanged="time_textbox_TextChanged" Text="-1" KeyUp="time_textbox_KeyUp" ToolTip=""/>
         <Button x:Name="update_process_button" Content="Обновить" HorizontalAlignment="Left" Margin="329,115,0,0" VerticalAlignment="Top" Width="103" Height="25" FontSize="16" Click="update_process_button_Click" ToolTip="Обновить все процессы"/>
         <tb:TaskbarIcon Visibility="Visible" ToolTipText="ExcessProcessKiller" IconSource="process_icon.ico" Margin="0,0,-0.2,-0.2" TrayLeftMouseDown="TaskbarIcon_TrayLeftMouseDown" PopupActivation="RightClick" >
             <tb:TaskbarIcon.TrayPopup>
@@ -79,6 +79,6 @@
             </tb:TaskbarIcon.TrayPopup>
         </tb:TaskbarIcon>
         <Label x:Name="time_type_title" Content="мин" HorizontalAlignment="Left" Margin="396,64,0,0" VerticalAlignment="Top" MouseDown="time_type_title_MouseDown"/>
-        <ProgressBar x:Name="timer_progress_bar" HorizontalAlignment="Left" Height="15" Margin="329,25,0,0" VerticalAlignment="Top" Width="103"/>
+        <ProgressBar x:Name="timer_progress_bar" HorizontalAlignment="Left" Height="15" Margin="329,88,0,0" VerticalAlignment="Top" Width="103"/>
     </Grid>
 </Window>
